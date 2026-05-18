@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Setup Frontend React Project",
+			"type": "shell",
+			"command": "cd c:\\Users\\ASUS\\OneDrive\\Documents\\Desktop\\ESE && npm create vite@latest frontend -- --template react && cd frontend && npm install",
+			"group": "build"
+		}
+	]
+}
