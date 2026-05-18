@@ -24,7 +24,6 @@ app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'Backend is running' });
