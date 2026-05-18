@@ -11,6 +11,22 @@ const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 
+// If frontend build exists, serve it as a SPA.
+// This prevents Render/host 404s on client-side routes.
+const path = require('path');
+const fs = require('fs');
+const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
+
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+
+  // SPA fallback for any route that isn't an API route
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+}
+
 // Connect to MongoDB
 connectDB();
 
@@ -46,8 +62,15 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const PORT = process.env.PORT || 10000;
+const HOST = process.env.HOST || '0.0.0.0';
+
+const server = app.listen(PORT, HOST, () => {
+  console.log(`Server running on ${HOST}:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
+
+// Help avoid intermittent gateway timeouts / connection resets behind proxies
+// (values can be tuned, but start with 120s as a common safe default)
+server.keepAliveTimeout = Number(process.env.KEEP_ALIVE_TIMEOUT_MS) || 120000;
+server.headersTimeout = Number(process.env.HEADERS_TIMEOUT_MS) || 120000;
